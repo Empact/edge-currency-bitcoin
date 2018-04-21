@@ -328,8 +328,7 @@ export class KeyManager {
       subtractFee: subtractFee,
       height: height,
       rate: rate,
-      maxFee: maxFee,
-      estimate: prev => this.estimateSize(prev)
+      maxFee: maxFee
     })
 
     // If TX is RBF mark is by changing the Inputs sequences
@@ -598,36 +597,5 @@ export class KeyManager {
     const scriptHashRaw = await hash256(scriptRaw)
     const scriptHash = reverseBufferToHex(scriptHashRaw)
     return scriptHash
-  }
-
-  estimateSize (prev: any) {
-    const scale = bcoin.consensus.WITNESS_SCALE_FACTOR
-    const address = prev.getAddress()
-    if (!address) return -1
-
-    let size = 0
-
-    if (prev.isScripthash()) {
-      if (this.bip === 'bip49') {
-        size += 23 // redeem script
-        size *= 4 // vsize
-        // Varint witness items length.
-        size += 1
-        // Calculate vsize
-        size = ((size + scale - 1) / scale) | 0
-      }
-    }
-
-    // P2PKH
-    if (this.bip !== 'bip49') {
-      // varint script size
-      size += 1
-      // OP_PUSHDATA0 [signature]
-      size += 1 + 73
-      // OP_PUSHDATA0 [key]
-      size += 1 + 33
-    }
-
-    return size || -1
   }
 }
